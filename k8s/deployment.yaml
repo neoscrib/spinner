@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spinner
+  namespace: myapps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: deployment-myapps-spinner
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: deployment-myapps-spinner
+    spec:
+      affinity: {}
+      containers:
+        - image: docker.slinq.dev/neoscrib/spinner:1.0.0-0
+          imagePullPolicy: Always
+          name: spinner
+          ports:
+            - containerPort: 80
+              name: default
+              protocol: TCP
+      imagePullSecrets:
+        - name: slinq-docker
+      restartPolicy: Always

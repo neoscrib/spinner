@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spinner
+  namespace: myapps
+  ownerReferences:
+    - apiVersion: apps/v1
+      controller: true
+      kind: Deployment
+      name: spinner
+      uid: 015d4bc5-3063-4114-944d-5ac662c4ebda
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: default
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    workload.user.cattle.io/workloadselector: deployment-myapps-spinner
+  sessionAffinity: None
+  type: ClusterIP

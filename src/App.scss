@@ -1,0 +1,35 @@
+.app {
+    max-width: 1024px;
+    margin: 0 auto;
+}
+
+.content {
+    display: flex;
+    gap: 1em;
+    justify-content: space-between;
+}
+
+.items-container {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    gap: 1em;
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    align-items: flex-end;
+}
+
+@media only screen and (orientation: portrait) {
+    .content {
+        flex-direction: column;
+    }
+
+    .items-list {
+        flex-flow: wrap;
+        justify-content: flex-end;
+    }
+}

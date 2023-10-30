@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "moduleResolution": "node",
+        "target": "es2018",
+        "lib": [ "dom", "esnext" ],
+        "jsx": "react",
+        "module": "esnext",
+        "experimentalDecorators": true,
+        "noImplicitAny": true,
+        "sourceMap": true,
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true
+    },
+    "exclude": [ "node_modules", "dist" ]
+}

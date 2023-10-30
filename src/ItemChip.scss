@@ -1,0 +1,13 @@
+.icon {
+    cursor: pointer;
+
+    :hover {
+        color: rgba(255, 255, 255, 0.4);
+    }
+}
+
+.input {
+    border: none;
+    outline: none;
+    margin-right: 1em;
+}

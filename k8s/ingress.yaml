@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spinner
+  namespace: myapps
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: spinner.myapps.dev
+      http:
+        paths:
+          - backend:
+              service:
+                name: spinner
+                port:
+                  number: 80
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - spinner.myapps.dev
+      secretName: myapps-wildcard
