@@ -1,6 +1,6 @@
 import { createRef, useEffect, useState } from 'react';
 import * as React from 'react';
-import { Button, Card, CardContent, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, IconButton, ThemeProvider, Typography } from '@mui/material';
+import { Alert, Button, Card, CardContent, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, IconButton, Snackbar, ThemeProvider, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import styles from './App.scss';
 import ItemChip from './ItemChip';
@@ -8,6 +8,7 @@ import SpinListener from './SpinListener';
 import { theme } from './theme';
 import Wheel from './Wheel';
 import confetti from 'canvas-confetti';
+import ShareOutlined from '@mui/icons-material/ShareOutlined';
 
 const spinListener = new SpinListener();
 
@@ -43,7 +44,9 @@ const fetti = () => {
 };
 
 const saveState = (state: IAppState) => {
-    window.localStorage.setItem('state', JSON.stringify(state));
+    if (!window.location.search || !new URLSearchParams(window.location.search).has("items")) {
+        window.localStorage.setItem('state', JSON.stringify(state));
+    }
 }
 
 const loadState = (): IAppState => {
@@ -52,12 +55,20 @@ const loadState = (): IAppState => {
         items: defaultItems
     };
 
-    try {
-        const json = window.localStorage.getItem('state');
-        return json ? JSON.parse(json) : defaultState;
-    } catch (e) {
-        console.error('Failed to load application', e);
-        return defaultState;
+    if (window.location.search) {
+        const params = new URLSearchParams(window.location.search);
+        const items = params.get("items")?.split(",");
+        if (items.length) {
+            return {...defaultState, items: items.map(label => ({enabled: true, label}))};
+        }
+    } else {
+        try {
+            const json = window.localStorage.getItem('state');
+            return json ? JSON.parse(json) : defaultState;
+        } catch (e) {
+            console.error('Failed to load application', e);
+            return defaultState;
+        }
     }
 }
 
@@ -66,6 +77,7 @@ const App = () => {
     const [ items, setItems ] = useState(loadState().items);
     const [ selected, setSelected ] = useState('');
     const [ size, setSize ] = useState(600);
+    const [ showClipboardSuccess, setShowClipboardSuccess ] = useState(false);
 
     const containerRef = createRef<HTMLDivElement>();
 
@@ -93,6 +105,13 @@ const App = () => {
 
     const onUpdate = (oldItem: IItem, newItem: IItem) => setItems(items.map(i => i.label === oldItem.label ? newItem : i));
 
+    const copyLink = async () => {
+        const url = new URL(window.location.origin);
+        url.searchParams.set("items", items.map(item => item.label).join(","));
+        await navigator.clipboard.writeText(url.toString());
+        setShowClipboardSuccess(true);
+    };
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
@@ -103,7 +122,11 @@ const App = () => {
                             <div className={styles.content}>
                                 <Wheel onItemSelected={setSelected} spinListener={spinListener} size={size} startRotation={rotation} onRotationUpdated={setRotation} slices={items.filter(i => i.enabled).map(i => i.label)} />
                                 <div className={styles.itemsContainer}>
-                                    <Typography>Items <IconButton onClick={() => setItems([ ...items, { enabled: true, label: 'Untitled Item', editing: true } ])} ><AddIcon /></IconButton></Typography>
+                                    <div style={{display: "flex", gap: "0.5rem", alignItems: "center"}}>
+                                        <IconButton onClick={copyLink}><ShareOutlined/></IconButton>
+                                        <Typography>Items</Typography>
+                                        <IconButton onClick={() => setItems([ ...items, { enabled: true, label: 'Untitled Item', editing: true } ])} ><AddIcon /></IconButton>
+                                    </div>
                                     <div className={styles.itemsList}>
                                         {items.map((group, i) => <ItemChip item={group} key={i}
                                                                            onDelete={label => setItems(items.filter(g => g.label !== label))}
@@ -123,6 +146,9 @@ const App = () => {
                             <Button onClick={() => setSelected('')} autoFocus>Close</Button>
                         </DialogActions>
                     </Dialog>
+                    <Snackbar open={showClipboardSuccess} autoHideDuration={5000} onClose={() => setShowClipboardSuccess(false)}>
+                        <Alert onClose={() => setShowClipboardSuccess(false)} severity="success">URL copied to clipboard!</Alert>
+                    </Snackbar>
                 </div>
             </CssBaseline>
         </ThemeProvider>
